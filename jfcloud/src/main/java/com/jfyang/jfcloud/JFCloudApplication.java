@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @ServletComponentScan("com.jfyang.jfcloud.auth")
-@ComponentScan("com.jfyang.jfcloud")
+@ComponentScan({"com.jfyang.jfcloud","com.jfyang.jfcloud.auth"})
 @EnableScheduling
 public class JFCloudApplication {
 
