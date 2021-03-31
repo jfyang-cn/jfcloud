@@ -41,8 +41,9 @@ public class AuthManager {
 		logger.info("auth manager init");
     	db = dbManager.getDefaultDb();
     	authAppDao = new RocksDao<AuthApp>(AuthApp.class, db, authAppTbl);
+    	authAppDao.init();
     	authTokenDao = new RocksDao<AuthToken>(AuthToken.class, db, authTokenTbl);
-    	
+    	authTokenDao.init();
     	return;
     }
 	
@@ -57,7 +58,7 @@ public class AuthManager {
 		app.setUserId(userId);
 		app.setCreateTime(CommonUtil.currentTimeInSec());
 
-		authAppDao.put(appKey, JSON.toJSONString(app));
+		authAppDao.put(appKey, app);
 		
 		return app;
 	}
@@ -77,15 +78,14 @@ public class AuthManager {
 		String data = appKey+","+expireTime+","+type;
 		String token = DigestUtils.sha256Hex(data);
 		
-		AuthToken authToken = new AuthToken();
-		
+		AuthToken authToken = new AuthToken();		
 		authToken.setAppKey(appKey);
 		authToken.setCreateTime(currentTime);
 		authToken.setExpireTime(expireTime);
 		authToken.setToken(token);
 		authToken.setType(type);
 				
-		authTokenDao.put(token, JSON.toJSONString(authToken));
+		authTokenDao.put(token, authToken);
 		
 		return authToken;
 	}

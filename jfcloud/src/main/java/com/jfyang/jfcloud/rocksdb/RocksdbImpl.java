@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.rocksdb.ColumnFamilyDescriptor;
@@ -153,6 +154,35 @@ public class RocksdbImpl {
 		});
 		return tables;
 	}
+	
+	public void buildTableIndex(String tableName, RocksDataInterface dao) {
+		RocksIterator iter = null;
+		try {
+
+			if (!tableList.containsKey(tableName)) {
+				logger.error("table {} isn't exist!", tableName);
+				return;
+			}
+
+			ReadOptions readOptions = new ReadOptions();
+			readOptions.setTotalOrderSeek(true);
+			readOptions.setPrefixSameAsStart(true);
+			iter = db.newIterator(tableList.get(tableName), readOptions);
+
+			for (iter.seekToFirst(); iter.isValid(); iter.next()) {
+				String data = new String(iter.value());
+				String key = new String(iter.key());
+				if (data!=null && !data.isEmpty())
+					dao.buildIndex(key, data);
+			}
+			
+			iter.close();
+		} catch (Exception e) {
+			StringWriter error = new StringWriter();
+			e.printStackTrace(new PrintWriter(error));
+			logger.error(error.toString());
+		}
+	}
 
 	public int putValue(String tableName, String key, String value) {
 		
@@ -200,6 +230,34 @@ public class RocksdbImpl {
 		return cBuf.toString();
 	}
 	
+	public List<String> getValues(String tableName, Set<String> keys) {
+		List<String> ret = new ArrayList<String>();
+		
+		if (!tableList.containsKey(tableName)) {
+			logger.error("table {} isn't exist!", tableName);
+			return null;
+		}
+		
+		ColumnFamilyHandle columnFamilyHandle = tableList.get(tableName);
+		keys.forEach(key -> {
+			byte[] value = null;
+			try {
+				value = db.get(columnFamilyHandle, key.getBytes(charset));
+				if (value != null) {
+					ByteBuffer buf = ByteBuffer.wrap(value);
+			        CharBuffer cBuf = charset.decode(buf);
+					ret.add(cBuf.toString());
+				}
+			} catch (RocksDBException e) {
+				StringWriter error = new StringWriter();
+				e.printStackTrace(new PrintWriter(error));
+				logger.error(error.toString());
+			}
+		});
+		
+		return ret;
+	}
+	
 	public int delValue(String tableName, String key) {
 		try {
 			if (!tableList.containsKey(tableName)) {
@@ -245,5 +303,77 @@ public class RocksdbImpl {
 		}
 
 		return map;
+	}
+	
+	public Map<String, String> seek(String tableName, String key){
+		RocksIterator iter = null;
+		Map<String,String> map = new LinkedHashMap<>();
+		
+		try {
+
+			if (!tableList.containsKey(tableName)) {
+				logger.error("table {} isn't exist!", tableName);
+				return map;
+			}
+
+			ReadOptions readOptions = new ReadOptions();
+			readOptions.setTotalOrderSeek(true);
+			readOptions.setPrefixSameAsStart(true);
+			iter = db.newIterator(tableList.get(tableName), readOptions);
+
+			for (iter.seek(key.getBytes(charset)); iter.isValid(); iter.next()) {
+				
+	            String k = new String(iter.key());
+	            if (!k.startsWith(key))
+	            	break;
+
+				String data = new String(iter.value());
+				map.put(new String(iter.key()), data);
+			}
+			
+			iter.close();
+		} catch (Exception e) {
+			StringWriter error = new StringWriter();
+			e.printStackTrace(new PrintWriter(error));
+			logger.error(error.toString());
+		}
+		
+		return map;
+	}
+	
+	public Pair<String, String> first(String tableName, String key) {
+		RocksIterator iter = null;
+		Pair<String, String> ret = null;
+		try {
+
+			if (!tableList.containsKey(tableName)) {
+				logger.error("table {} isn't exist!", tableName);
+				return ret;
+			}
+
+			ReadOptions readOptions = new ReadOptions();
+			readOptions.setTotalOrderSeek(true);
+			readOptions.setPrefixSameAsStart(true);
+			iter = db.newIterator(tableList.get(tableName), readOptions);
+
+			iter.seek(key.getBytes(charset)); 
+			if (iter.isValid()) {
+				
+	            String k = new String(iter.key());
+	            if (!k.startsWith(key))
+	            	return ret;
+
+				String data = new String(iter.value());
+				ret = new Pair<String, String>(new String(iter.key()), data);
+			}
+			
+			iter.close();
+		} catch (Exception e) {
+			StringWriter error = new StringWriter();
+			e.printStackTrace(new PrintWriter(error));
+			logger.error(error.toString());
+		}
+		
+		return ret;
 	}
 }

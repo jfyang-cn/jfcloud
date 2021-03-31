@@ -1,13 +1,16 @@
 package com.jfyang.jfcloud.common;
 
-import com.alibaba.fastjson.JSONObject;
-
-public class BaseResponse {
+public class BaseResponse<T> {
 	
-    public static JSONObject Create(int code, String reason) {
-        JSONObject obj = new JSONObject();
-        obj.put("code", code);
-        obj.put("reason", reason);
-        return obj;
-    }
+	private int code;
+	private String reason;
+	private int total;
+	private T record;
+	
+	public BaseResponse(int code, String reason, int total, T record) {
+		this.code = code;
+		this.reason = reason;
+		this.total = total;
+		this.record = record;
+	}
 }

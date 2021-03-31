@@ -10,6 +10,7 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
@@ -82,6 +83,20 @@ public class RocksdbController {
 		logger.info("dbName: "+dbName+", tableName: "+tableName);
 		RocksdbImpl db = dbManager.getDb(dbName);
 		Map<String,String> data = db.getTableData(tableName);
+		return data;
+	}
+	
+	@RequestMapping("/{dbName}/table/{tableName}/seek")
+	public Map<String,String> tableShow(@PathVariable("dbName") String dbName,
+			@PathVariable("tableName") String tableName,
+			@RequestParam(value="keyname", required=true) String keyname
+			) {
+		logger.info("dbName: {}, tableName: {}, keyname: {}", dbName, tableName, keyname);
+		if (keyname == null)
+			return null;
+		
+		RocksdbImpl db = dbManager.getDb(dbName);
+		Map<String,String> data = db.seek(tableName, keyname);
 		return data;
 	}
 	
