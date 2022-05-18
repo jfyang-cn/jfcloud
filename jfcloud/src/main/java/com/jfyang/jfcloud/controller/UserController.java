@@ -1,20 +1,19 @@
 package com.jfyang.jfcloud.controller;
 
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
-import com.jfyang.jfcloud.common.BaseResult;
+import com.jfyang.jfcloud.common.BaseRespT;
 
 @RestController
 @RequestMapping("/jfcloud/user")
 public class UserController {
 
 	@RequestMapping("/list")
-	public BaseResult list(@RequestBody JSONObject jsonObject){
+	public BaseRespT<?> list(@RequestBody JSONObject jsonObject){
 		
-		return new BaseResult(0, "success");
+		return new BaseRespT<Object>(0, "success");
 	}
 }

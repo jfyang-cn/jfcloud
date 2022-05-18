@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.alibaba.fastjson.JSON;
-import com.jfyang.jfcloud.common.BaseResult;
+import com.jfyang.jfcloud.common.BaseRespT;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -81,7 +81,7 @@ public class TokenInterceptorFilter implements Filter {
 			osw = new OutputStreamWriter(resp.getOutputStream(),
 					"UTF-8");
 			writer = new PrintWriter(osw, true);
-			String jsonStr = JSON.toJSONString(new BaseResult(1, "auth fail"));
+			String jsonStr = JSON.toJSONString(new BaseRespT<String>(1, "auth fail"));
 			writer.write(jsonStr);
 			writer.flush();
 			writer.close();

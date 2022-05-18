@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
-import com.jfyang.jfcloud.common.BaseResult;
+import com.jfyang.jfcloud.common.BaseRespT;
 import com.jfyang.jfcloud.db.DbManager;
 import com.jfyang.jfcloud.rocksdb.RocksdbImpl;
 
@@ -29,23 +29,23 @@ public class RocksdbController {
     private DbManager dbManager;
 	
 	@RequestMapping("/error")
-	public BaseResult error(){
+	public BaseRespT<?> error(){
 		
-		return new BaseResult(1, "auth error");
+		return new BaseRespT<Object>(1, "auth error");
 	}
 	
 	@RequestMapping("/{dbName}/create")
-	public BaseResult createDb(@PathVariable("dbName") String dbName) {
+	public BaseRespT<?> createDb(@PathVariable("dbName") String dbName) {
 		logger.info("dbName: "+dbName);
 		int ret = dbManager.createDb(dbName);
-		return new BaseResult(ret, "");
+		return new BaseRespT<Object>(ret, "");
 	}
 	
 	@RequestMapping("/{dbName}/drop")
-	public BaseResult dropDb(@PathVariable("dbName") String dbName) {
+	public BaseRespT<?> dropDb(@PathVariable("dbName") String dbName) {
 		logger.info("dbName: "+dbName);
 		int ret = dbManager.dropDb(dbName);		
-		return new BaseResult(ret, "");
+		return new BaseRespT<Object>(ret, "");
 	}
 	
 	@RequestMapping("/{dbName}/tables")
@@ -57,23 +57,23 @@ public class RocksdbController {
 	}
 	
 	@RequestMapping("/{dbName}/table/{tableName}/create")
-	public BaseResult createTable(@PathVariable("dbName") String dbName,
+	public BaseRespT<?> createTable(@PathVariable("dbName") String dbName,
 			@PathVariable("tableName") String tableName
 			) {
 		logger.info("dbName: "+dbName+", tableName: "+tableName);
 		RocksdbImpl db = dbManager.getDb(dbName);
 		int ret = db.createTable(tableName);
-		return new BaseResult(ret, "");
+		return new BaseRespT<Object>(ret, "");
 	}
 	
 	@RequestMapping("/{dbName}/table/{tableName}/drop")
-	public BaseResult dropTable(@PathVariable("dbName") String dbName,
+	public BaseRespT<?> dropTable(@PathVariable("dbName") String dbName,
 			@PathVariable("tableName") String tableName
 			) {
 		logger.info("dbName: "+dbName+", tableName: "+tableName);
 		RocksdbImpl db = dbManager.getDb(dbName);
 		int ret = db.dropTable(tableName);
-		return new BaseResult(ret, "");
+		return new BaseRespT<Object>(ret, "");
 	}
 	
 	@RequestMapping("/{dbName}/table/{tableName}/show")

@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
-import com.jfyang.jfcloud.common.BaseResponse;
-import com.jfyang.jfcloud.common.BaseResult;
+import com.jfyang.jfcloud.common.BasePageRespT;
+import com.jfyang.jfcloud.common.BaseRespT;
 import com.jfyang.jfcloud.jobpool.Job;
 import com.jfyang.jfcloud.jobpool.JobManager;
 
@@ -25,53 +25,53 @@ public class JobController {
     private JobManager jobManager;
     
 	@RequestMapping("/error")
-	public BaseResult error(@RequestParam(value="error", required=false) Integer error){
+	public BaseRespT<String> error(@RequestParam(value="error", required=false) Integer error){
 		if (error == null) {
-			return new BaseResult(-1, "unknown error");
+			return new BaseRespT<String>(-1, "unknown error");
 		}
 		
-		return new BaseResult(error, "error");
+		return new BaseRespT<String>(error, "error");
 	}	
     
 	@RequestMapping("/{type}/list")
-	public List<Job> list(@PathVariable("type") String type){
+	public BasePageRespT<Job> list(@PathVariable("type") String type){
+		List<Job> jobs = jobManager.get(type).list();
 		
-		return jobManager.get(type).list();
+		return new BasePageRespT<Job>(0, "success", jobs.size(), jobs); 
 	}
 	
 	@RequestMapping("/{type}/put")
-	public BaseResult put(@PathVariable("type") String type, @RequestBody JSONObject jsonObject){
+	public BaseRespT<String> put(@PathVariable("type") String type, @RequestBody JSONObject jsonObject){
 		String ref = jsonObject.getString("ref");
 		String content = jsonObject.getString("content");
 		int ret = jobManager.get(type).put(type, ref, content);		
-		return new BaseResult(ret, "");
+		return new BaseRespT<String>(ret, "");
 	}
 	
 	@RequestMapping("/{type}/take")
-	public BaseResult take(@PathVariable("type") String type, @RequestBody JSONObject jsonObject){
+	public BaseRespT<Job> take(@PathVariable("type") String type, @RequestBody JSONObject jsonObject){
 		String worker = jsonObject.getString("worker");
 		Job job = jobManager.get(type).take(worker);
 		
-		BaseResult ret = new BaseResult(-1, "no queued job");
+		BaseRespT<Job> ret = new BaseRespT<Job>(-1, "no queued job");
 		
 		if (job == null) {
 			return ret;
 		}
 		
 		ret.setCode(0);
-		ret.setReason("success");
-		ret.setTotal(1);
+		ret.setReason("success");		
 		ret.setRecord(job);
 		
 		return ret;
 	}
 	
 	@RequestMapping("/{type}/get")
-	public BaseResult get(@PathVariable("type") String type, @RequestBody JSONObject jsonObject){
+	public BaseRespT<Job> get(@PathVariable("type") String type, @RequestBody JSONObject jsonObject){
 		String id = jsonObject.getString("id");
 		Job job = jobManager.get(type).get(id);
 		
-		BaseResult ret = new BaseResult(-1, "job does not exist");
+		BaseRespT<Job> ret = new BaseRespT<Job>(-1, "job does not exist");
 		
 		if (job == null) {
 			return ret;
@@ -79,7 +79,6 @@ public class JobController {
 		
 		ret.setCode(0);
 		ret.setReason("success");
-		ret.setTotal(1);
 		ret.setRecord(job);
 		
 		return ret;

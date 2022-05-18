@@ -77,7 +77,7 @@ public class RouteController {
         definition.setPredicates(pdList);
 
         //设置过滤器
-        List<FilterDefinition> filters = new ArrayList();
+        List<FilterDefinition> filters = new ArrayList<FilterDefinition>();
         List<GatewayFilterDefinition> gatewayFilters = gwdefinition.getFilters();
         for(GatewayFilterDefinition filterDefinition : gatewayFilters){
             FilterDefinition filter = new FilterDefinition();
